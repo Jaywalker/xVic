@@ -40,12 +40,12 @@ int dumpImage(FWImage *img, char *name) {
 			printPixel = row << (7 - y);
 			printPixel = printPixel >> 7;
 			if (printPixel) { //Fill a pixel
-				//Swap last and second row (No idea why they do this)
+				//Swap  every 2 rows (No idea why they do this)
 				int fixX = x;
-				if (fixX == 1) {
-					fixX = datalen - 1;
-				} else if (fixX == (datalen - 1)) {
-					fixX = 1;
+				if (fixX == 0 || fixX % 2 == 0) {
+					fixX++;
+				} else {
+					fixX--;
 				}
 				gdImageFilledRectangle(im, fixX, y, fixX, y, black);
 			}
