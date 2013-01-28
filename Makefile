@@ -1,6 +1,9 @@
+CC=gcc
+CFLAGS=-I/opt/local/include/ -L/opt/local/lib/
 all:
-	gcc -o xvic -m32 xvic.c
+	$(CC) -o xvic -m32 $(CFLAGS) xvic.c
+	$(CC) -o dumpimages $(CFLAGS) -lgd dumpimages.c
 
 clean:
-	rm xvic
+	rm xvic dumpimages
 
