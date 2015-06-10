@@ -59,12 +59,34 @@ int dumpImage(FWImage *img, char *name) {
 int main(int argc, char **args) {
 	FWImage img;
 	char name[255];
+	unsigned char bytes[9];
 	int datalen;
+	unsigned int location = 0;
 	FILE *fp = fopen(args[1], "rb");
+	if (!fp)
+	{
+		printf("Can't open file: %s\n", args[1]);
+		return -1;
+	}
 
-	fseek(fp, 0x2B13, SEEK_SET);
+	while (location < 64000)
+	{
+		fread(bytes, 1, 8, fp);
+		// Locate image "0": 06 08 7E 00 81 81 7E 81
+		if (bytes[0] == 0x06 && bytes[1] == 0x08 && bytes[2] == 0x7e && bytes[3] == 0x00 &&
+		    bytes[4] == 0x81 && bytes[5] == 0x81 && bytes[6] == 0x7e && bytes[7] == 0x81)
+		{
+			break;
+		}
+		location++;
+		fseek(fp, location, SEEK_SET);
+	}
+
+	printf("Location found: %04x\n", location);
+	fseek(fp, location, SEEK_SET);
 
 	do {
+		location = ftell(fp);
 		img.width = fgetc(fp);
 		img.height = fgetc(fp);
 
@@ -73,7 +95,8 @@ int main(int argc, char **args) {
 		img.data = (char *)malloc(datalen);
 		fread(img.data, 1, datalen, fp);
 
-		sprintf(&name, "%X.png\0", ftell(fp));
+		sprintf(&name, "%X.png\0", location);
+		//sprintf(&name, "%X.png\0", ftell(fp));
 
 		printf("Dumping image %s (%dx%d)\n", name, img.width, img.height);
 		dumpImage(&img, name);
